@@ -2115,9 +2115,7 @@ INSERT INTO detalle_boleta VALUES (
 
 COMMIT;
 
-/* CASO 1
-
-SELECT * FROM FACTURA;
+-- CASO 1
 
 SELECT 
 numfactura                          AS "N° Factura", 
@@ -2142,9 +2140,7 @@ FROM factura
 WHERE EXTRACT(YEAR FROM fecha) = (EXTRACT(YEAR FROM SYSDATE) -1)
 ORDER BY fecha DESC, neto DESC;
 
-/* CASO 2
-
-SELECT * FROM CLIENTE;
+-- CASO 2
 
 SELECT 
 LPAD(rutcliente, 12, '*')             AS RUT, 
@@ -2162,9 +2158,7 @@ FROM cliente
 WHERE estado = 'A' AND credito > 0
 ORDER BY nombre ASC;
 
-/* CASO 3
-
-SELECT * FROM producto;
+-- CASO 3
 
 SELECT 
 codproducto                     AS ID,
@@ -2180,7 +2174,7 @@ CASE
 END                                            AS "Alerta Stock",
 CASE
     WHEN totalstock > 80 THEN TO_CHAR((vunitario * 0.9), '$999G999')
-    ELSE LPAD('N/A', 10, ' ')
+    ELSE LPAD('N/A', 9, ' ')
 END                                            AS "Precio Oferta"
 
 FROM producto
