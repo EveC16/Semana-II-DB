@@ -2148,17 +2148,16 @@ SELECT * FROM CLIENTE;
 
 SELECT 
 LPAD(rutcliente, 12, '*')             AS RUT, 
-nombre                                AS Cliente,
+nombre                                AS "Cliente",
 NVL(TO_CHAR(telefono),'Sin teléfono') AS TELÉFONO,
 NVL(TO_CHAR(codcomuna), 'Sin comuna') AS COMUNA,
 estado                                AS ESTADO,
-credito,
 CASE
     WHEN (saldo / credito) < 0.5 THEN 'Bueno (' || TO_CHAR(credito - saldo, '$9G999G999') || ')'
     WHEN (saldo / credito) BETWEEN 0.5 AND 0.8 THEN 'Regular (' || TO_CHAR(saldo, '$9G999G999') || ')'
     ELSE 'Crítico'
 END AS "Estado Crédito",
-NVL(mail, 'Correo no registrado')     AS "Dominio Correo"
+NVL(UPPER(SUBSTR(mail, INSTR(mail, '@') + 1)), 'Correo no registrado')     AS "Dominio Correo"
 FROM cliente
 WHERE estado = 'A' AND credito > 0
 ORDER BY nombre ASC;
@@ -2168,17 +2167,22 @@ ORDER BY nombre ASC;
 SELECT * FROM producto;
 
 SELECT 
-codproducto,
-INITCAP(descripcion)                           AS "Descripción de Producto",
-NVL(TO_CHAR(valorcompradolar), 'Sin registro') AS "Compra en USD",
-NVL2(valorcompradolar, TO_CHAR(valorcompradolar * &TIPO_CAMBIO_CLP, '$999G999') || ' PESOS', 'Sin registro') AS "USD convertido",
-totalstock,
+codproducto                     AS ID,
+INITCAP(descripcion)            AS "Descripción de Producto",
+LPAD(NVL2(valorcompradolar, TO_CHAR(valorcompradolar) || ' USD', 'Sin registro'), 15, ' ') AS "Compra en USD",
+NVL2(valorcompradolar, TO_CHAR(valorcompradolar * &TIPO_CAMBIO_CLP, '$999G999') || ' PESOS', LPAD('Sin registro', 15, ' ')) AS "USD convertido",
+totalstock                      AS "Stock",
 CASE
     WHEN totalstock IS NULL THEN 'Sin datos'
-    WHEN totalstock < &&UMBRAL_BAJO THEN '¡ALERTA stock muy bajo!'
+    WHEN totalstock < &UMBRAL_BAJO THEN '¡ALERTA stock muy bajo!'
     WHEN totalstock BETWEEN &UMBRAL_BAJO AND &UMBRAL_ALTO THEN '¡Reabastecer pronto!'
     ELSE 'OK'
-END                                            AS "Alerta Stock"
+END                                            AS "Alerta Stock",
+CASE
+    WHEN totalstock > 80 THEN TO_CHAR((vunitario * 0.9), '$999G999')
+    ELSE LPAD('N/A', 10, ' ')
+END                                            AS "Precio Oferta"
+
 FROM producto
 WHERE LOWER(descripcion) LIKE '%zapato%' AND LOWER(procedencia) = 'i'
 ORDER BY codproducto DESC;
